@@ -1,144 +1,105 @@
-# Interactive Classroom Engagement Detection — Complete System
+# Real-Time Student Engagement Detection — Classical Machine Learning System
 
-Real-time student engagement detection from a webcam feed, with a live
-teacher dashboard. **The model is already trained and included** —
-just install requirements and run `src/app.py`.
+An end-to-end, classical **Machine Learning** system for real-time student engagement detection in classroom environments from live video feeds.
 
-## What's included (already done)
+> **Classical Machine Learning Architecture:**
+> This system replaces Deep Neural Networks (CNNs/MobileNetV2, backpropagation, and Adam) entirely with **domain-expert feature engineering** (HOG + LBP + HSV Color + Haar-like geometry) paired with scikit-learn ML classifiers: **SVM (Support Vector Machine)**, **Random Forest**, and **K-Nearest Neighbors (KNN)**.
 
-- **Merged dataset** from 3 sources into one unified 6-class set:
-  - Kaggle "Student-engagement-dataset" (2,120 images)
-  - Custom "Maleha" dataset (32 images)
-  - Custom "Zoha" dataset (125 images, HEIC auto-converted to JPG)
-  - **Total: 2,277 real images**, split 70/15/15 → `data/prepared/{train,val,test}`
-- **A trained model** at `models/best_model.keras` (transfer learning on
-  a frozen, pretrained MobileNetV2 backbone) — no need to retrain unless
-  you want to
-- **Real evaluation results** on the held-out test set (347 images, see
-  `outputs/`):
-  - Test accuracy: **87.9%**
-  - Per-class precision/recall/F1 → `outputs/classification_report.txt`
-  - Confusion matrix → `outputs/confusion_matrix.png`
-  - Train/val accuracy & loss curves → `outputs/training_curves.png`
-- **Live camera + dashboard system**: face detection → per-face
-  engagement prediction → boxes drawn live on video → session stats
+---
 
-Final classes: `Bored, Confused, Drowsy, Focused, Frustrated, Looking Away`
+## 🎯 10 Core Machine Learning Concepts Demonstrated
 
-## 1. Setup
+1. **Supervised Learning**: Model learns the mapping $f: X \to y$ from 2,277 labeled facial crops across 6 engagement states.
+2. **Feature Engineering**: Transforming raw pixel matrices into an engineered 938-dimensional feature vector:
+   - **HOG (Histogram of Oriented Gradients)** — 800 dimensions: Encodes facial contours, gradients, and edge geometry.
+   - **Spatial LBP (Local Binary Patterns)** — 90 dimensions: Encodes micro-textures across a 3×3 facial grid.
+   - **HSV Color Histograms** — 32 dimensions: Illumination-invariant skin color and tone distributions.
+   - **Haar-Like Contrast Features** — 16 dimensions: Anatomical contrast differences (eyes vs forehead, mouth vs nose, symmetry).
+3. **Feature Normalization (StandardScaler)**: Centers and scales all 938 dimensions to mean $\mu = 0$ and standard deviation $\sigma = 1$ to ensure equal weighting in distance/margin calculations.
+4. **Support Vector Machine (SVM)**: Primary classifier maximizing margin hyperplanes with the non-linear Radial Basis Function (RBF) kernel trick ($C=10, \gamma=\text{scale}$).
+5. **Random Forest (Ensemble Learning)**: Bootstrap aggregating (bagging) of 200 decorrelated decision trees, providing feature importance analysis.
+6. **K-Nearest Neighbors (KNN)**: Non-parametric instance-based lazy learner using inverse distance weighting ($k=7$).
+7. **Cross-Validation (5-Fold StratifiedKFold)**: Ensures balanced class distributions across folds during model validation and hyperparameter selection.
+8. **Overfitting vs. Underfitting Diagnosis**: Diagnosed using Learning Curves (sample size vs. training/cross-validation accuracy).
+9. **Comprehensive ML Evaluation**: Confusion Matrix, Precision, Recall, Macro/Weighted F1-score, and One-vs-Rest ROC Curves with AUC.
+10. **Hyperparameter Tuning**: Systematic evaluation of SVM $C$, Random Forest $n\_estimators$, and KNN $k$ values.
 
+---
+
+## 📊 Dataset & Performance
+
+- **Dataset**: 2,277 student face images across 6 classes: `Bored`, `Confused`, `Drowsy`, `Focused`, `Frustrated`, `Looking Away`
+- **Data Split**: Stratified 70% Train (1,591), 15% Validation (339), 15% Held-Out Test (347)
+
+### Model Comparison Table (Held-Out Test Set)
+
+| Classifier | Val Accuracy | Test Accuracy | Test F1-Score | ROC AUC (Macro) |
+| :--- | :---: | :---: | :---: | :---: |
+| **SVM (RBF, C=10)** *(Best)* | **97.94%** | **93.08%** | **0.9306** | **0.995** |
+| **Random Forest (n=200)** | 98.23% | 91.35% | 0.9134 | 0.992 |
+| **KNN (k=7, distance-weighted)** | 98.23% | 90.78% | 0.9069 | 0.989 |
+
+---
+
+## 🛠️ Project Structure
+
+```
+├── data/
+│   └── prepared/                 # Train (1591), Val (339), Test (347)
+├── frontend/
+│   └── index.html                # Teacher dashboard UI (HTML5/CSS3/JS)
+├── models/
+│   ├── best_model.joblib         # Serialized best ML model pipeline (StandardScaler + SVM)
+│   ├── svm_model.joblib          # Trained SVM model
+│   ├── rf_model.joblib           # Trained Random Forest model
+│   ├── knn_model.joblib          # Trained KNN model
+│   ├── scaler.joblib             # Fitted StandardScaler
+│   └── class_names.json          # 6 target engagement class labels
+├── outputs/
+│   ├── classification_report.txt # Per-class Precision, Recall, F1 metrics
+│   ├── confusion_matrix.png      # 6x6 test confusion matrix
+│   ├── roc_curves.png            # Multi-class ROC curves (One-vs-Rest)
+│   ├── learning_curves.png       # Learning curves (overfitting diagnosis)
+│   ├── feature_importance.png    # Top 25 visual features (Random Forest MDI)
+│   ├── model_comparison_table.txt# 3-classifier benchmark table
+│   └── hyperparameter_tuning_table.txt # 5-fold CV hyperparameter results
+├── src/
+│   ├── app.py                    # Flask server, MJPEG video feed & REST API
+│   ├── evaluate.py               # Complete ML evaluation & visualization suite
+│   ├── face_detector.py          # Classical OpenCV Haar Cascade face detection
+│   ├── inference.py              # Real-time feature extraction & prediction engine
+│   ├── model.py                  # Hand-crafted feature engineering (HOG+LBP+Color+Haar)
+│   ├── prepare_data.py           # Stratified data preparation pipeline
+│   ├── train.py                  # ML model training, 5-fold CV & tuning
+│   └── train_ml.py               # CLI entrypoint for training
+└── requirements.txt              # Pure ML dependencies (No TensorFlow)
+```
+
+---
+
+## 🚀 Quickstart Guide
+
+### 1. Install Dependencies
 ```bash
 pip install -r requirements.txt
 ```
 
-No internet needed to train — this project bundles the pretrained
-MobileNetV2 ImageNet weights locally at `pretrained/mobilenet_v2_no_top.h5`
-(fetched once from a GitHub-hosted mirror, since Keras's default source,
-`storage.googleapis.com`, is blocked on some networks/sandboxes).
-`src/model.py` loads this local file automatically — you'll only hit the
-network fallback if that file is missing.
+### 2. Train the Machine Learning Models
+Extract hand-crafted visual features, perform 5-fold cross-validation, and train SVM, Random Forest, and KNN:
+```bash
+python src/train_ml.py
+```
+*(or `python src/train.py`)*
 
-## 2. Run the live system (camera + dashboard) — the main thing
+### 3. Evaluate & Generate Diagnostic Plots
+Generate confusion matrix, ROC curves, learning curves, and feature importance:
+```bash
+python src/evaluate.py
+```
 
+### 4. Launch Real-Time Dashboard
+Start the Flask backend and live engagement detection interface:
 ```bash
 python src/app.py
 ```
-
-This starts a local Flask server and opens `http://localhost:5000` in
-your browser automatically — the teacher dashboard.
-
-**How it works:**
-- Click **Start Session** (optionally name it) — this opens your laptop
-  webcam feed in the dashboard
-- Every frame: OpenCV Haar cascade detects every face in view → each
-  face is cropped → fed to the trained model → predicted engagement
-  label is drawn as a colored box directly on the video (green = an
-  "engaged" state, red = a "not engaged" state)
-- The side panel shows a **live per-frame breakdown** and a **running
-  session-total breakdown**, updating every second
-- Click **Stop Session** — a summary (duration, per-class percentages,
-  total data points) appears
-
-**Notes:**
-- Works with multiple faces in frame at once (real classroom use case)
-  — each face gets its own box and label independently
-- Camera permission: your OS/browser may prompt for webcam access the
-  first time — allow it. If `cv2.VideoCapture(0)` fails to open, check
-  no other app (Zoom, Teams, etc.) is currently using the camera
-- The in-memory session log resets each time you restart the server
-  (fine for a class demo)
-
-## 3. (Optional) Retrain from scratch
-
-Only needed if you add more images or want to tweak the model — the
-shipped `models/best_model.keras` already works out of the box.
-
-```bash
-# 3a. Re-merge + re-split the raw datasets (only if you changed the raw folders)
-python src/prepare_data.py \
-    --kaggle_dir "/path/to/Student-engagement-dataset" \
-    --maleha_dir "/path/to/Maleha/Crop_images" \
-    --zoha_dir   "/path/to/Zoha" \
-    --out_dir data/prepared
-
-# 3b. Train (fresh run)
-python src/train.py --data_dir data/prepared --epochs 15
-
-#     ...or continue training an existing model for more epochs:
-python src/train.py --data_dir data/prepared --epochs 8 --resume
-
-# 3c. Evaluate on the test set
-python src/evaluate.py --data_dir data/prepared --model_path models/best_model.keras
-```
-
-`train.py` trains only a small classifier head (~165K params) on top of
-the **frozen** pretrained MobileNetV2 backbone. This is deliberate: an
-earlier attempt trained a CNN with BatchNorm from scratch on this small
-dataset, and it collapsed (validation accuracy stuck at the
-majority-class rate, loss exploding) because BatchNorm needs far more
-data/steps than ~1,500 images to build stable running statistics.
-Freezing a backbone pretrained on millions of ImageNet images sidesteps
-that entirely — only the head is trained, which is both more robust and
-far less prone to overfitting at this dataset size. This is also the
-standard, textbook-recommended approach for small image datasets, so
-it's a legitimate point for your report, not a workaround.
-
-## Report-ready material (already generated, in `outputs/`)
-
-- `training_curves.png` — train vs. validation accuracy/loss across all
-  16 training epochs, for your under/overfitting analysis
-- `confusion_matrix.png` — 6×6 confusion matrix on the test set
-- `classification_report.txt` — precision/recall/F1 per class + overall
-  test accuracy
-- `history.json` — raw per-epoch numbers behind the curves above
-
-Quick read on the results: Frustrated, Confused, and Looking Away are
-detected very reliably (F1 ≈ 0.94–0.96). Bored is the weakest class
-(recall 0.58) — it gets confused with Drowsy sometimes, which makes
-sense since both look visually similar (low energy, eyes semi-closed).
-Worth a line in your report's limitations section.
-
-## Project structure
-
-```
-project/
-├── data/prepared/            # train/val/test images (2,277 total, ready to use)
-├── models/
-│   ├── best_model.keras      # ← the trained model the app actually uses
-│   ├── final_model.keras
-│   └── class_names.json      # exact class order — app/report must match this
-├── pretrained/
-│   └── mobilenet_v2_no_top.h5  # local ImageNet weights (no internet needed)
-├── outputs/                  # training curves, confusion matrix, report, history.json
-├── frontend/
-│   └── index.html            # teacher dashboard (served by app.py)
-├── src/
-│   ├── prepare_data.py       # merge 3 raw datasets + split 70/15/15
-│   ├── model.py              # MobileNetV2 transfer-learning architecture
-│   ├── train.py              # training script (supports --resume)
-│   ├── evaluate.py           # test-set evaluation (confusion matrix, report)
-│   ├── face_detector.py      # OpenCV face detection/cropping
-│   ├── inference.py          # loads model, predicts on face crops
-│   └── app.py                # Flask backend + live camera + dashboard
-└── requirements.txt
-```
+Open **`http://localhost:5000`** in your browser.

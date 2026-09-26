@@ -1,0 +1,14 @@
+=== Best ML Model CLASSIFICATION REPORT (HELD-OUT TEST SET) ===
+
+              precision    recall  f1-score   support
+
+       Bored      0.909     0.833     0.870        60
+    Confused      0.966     0.918     0.941        61
+      Drowsy      0.857     0.900     0.878        40
+     Focused      0.892     0.951     0.921        61
+  Frustrated      1.000     1.000     1.000        55
+Looking Away      0.944     0.971     0.958        70
+
+    accuracy                          0.931       347
+   macro avg      0.928     0.929     0.928       347
+weighted avg      0.932     0.931     0.931       347

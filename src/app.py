@@ -184,7 +184,7 @@ def get_predictor():
     if _predictor is None and _predictor_error is None:
         try:
             _predictor = EngagementPredictor(
-                model_path=str(BASE_DIR / "models" / "best_model.keras"),
+                model_path=str(BASE_DIR / "models" / "best_model.joblib"),
                 class_names_path=str(BASE_DIR / "models" / "class_names.json"),
             )
         except Exception as e:  # noqa: BLE001

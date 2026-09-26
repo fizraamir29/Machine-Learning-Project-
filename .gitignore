@@ -19,18 +19,14 @@ data/raw/
 data/prepared/
 data/archive/
 
+# Cache files
+outputs/cache/
+
 # Pretrained weights (large files)
-pretrained/*.h5
-pretrained/*.weights
+pretrained/
 
-# Outputs (generated files)
-outputs/confusion_matrix.png
-outputs/training_curves.png
-outputs/classification_report.txt
-
-# Keep models (they are only ~11MB each)
-# models/best_model.keras  <-- we WILL push this
-# models/final_model.keras <-- we WILL push this
+# Old Keras models (Deep Learning removed)
+models/*.keras
 
 # OS files
 .DS_Store

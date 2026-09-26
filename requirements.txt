@@ -1,8 +1,9 @@
-tensorflow
 scikit-learn
+opencv-python
 matplotlib
 numpy
 pillow
 pillow-heif
 flask
-opencv-python
+joblib
+scikit-image
