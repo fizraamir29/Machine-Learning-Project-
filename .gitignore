@@ -1,0 +1,47 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.pyc
+*.pyo
+*.pyd
+.Python
+env/
+venv/
+.venv/
+*.egg-info/
+dist/
+build/
+.eggs/
+
+# Data directories (large datasets - not pushed to GitHub)
+data/raw/
+data/prepared/
+data/archive/
+
+# Pretrained weights (large files)
+pretrained/*.h5
+pretrained/*.weights
+
+# Outputs (generated files)
+outputs/confusion_matrix.png
+outputs/training_curves.png
+outputs/classification_report.txt
+
+# Keep models (they are only ~11MB each)
+# models/best_model.keras  <-- we WILL push this
+# models/final_model.keras <-- we WILL push this
+
+# OS files
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Logs
+*.log

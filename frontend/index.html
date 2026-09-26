@@ -1,0 +1,1021 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Interactive Classroom — Teacher Engagement Dashboard</title>
+  
+  <!-- Modern Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  
+  <!-- FontAwesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+  <style>
+    :root {
+      --bg: #0b0d14;
+      --card-bg: rgba(18, 22, 35, 0.75);
+      --card-border: rgba(255, 255, 255, 0.08);
+      --card-glow: rgba(79, 140, 255, 0.1);
+      
+      --text: #f0f4fc;
+      --text-muted: #8c96ab;
+      --text-dim: #5a6478;
+
+      /* Class palette */
+      --color-focused: #10b981;    /* Emerald Green */
+      --color-confused: #f59e0b;   /* Amber / Yellow */
+      --color-frustrated: #ef4444; /* Red */
+      --color-bored: #8b5cf6;      /* Violet / Purple */
+      --color-drowsy: #06b6d4;     /* Cyan / Light Blue */
+      --color-lookingaway: #64748b;/* Slate Gray */
+
+      --accent: #3b82f6;
+      --accent-gradient: linear-gradient(135deg, #3b82f6 0%, #6366f1 100%);
+      --green-gradient: linear-gradient(135deg, #10b981 0%, #059669 100%);
+      --red-gradient: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: var(--bg);
+      background-image: 
+        radial-gradient(at 15% 15%, rgba(59, 130, 246, 0.12) 0px, transparent 50%),
+        radial-gradient(at 85% 85%, rgba(139, 92, 246, 0.10) 0px, transparent 50%);
+      color: var(--text);
+      font-family: 'Inter', system-ui, -apple-system, sans-serif;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* Top Navbar */
+    header {
+      background: rgba(11, 13, 20, 0.85);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border-bottom: 1px solid var(--card-border);
+      padding: 14px 28px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .brand-icon {
+      width: 40px;
+      height: 40px;
+      border-radius: 10px;
+      background: var(--accent-gradient);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+      color: white;
+      box-shadow: 0 4px 14px rgba(59, 130, 246, 0.4);
+    }
+
+    .brand-text h1 {
+      font-family: 'Outfit', sans-serif;
+      font-size: 19px;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+    }
+
+    .brand-text p {
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+
+    .header-status {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+    }
+
+    .status-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 14px;
+      border-radius: 20px;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid var(--card-border);
+      font-size: 13px;
+      font-weight: 500;
+    }
+
+    .dot {
+      width: 9px;
+      height: 9px;
+      border-radius: 50%;
+      background: var(--text-dim);
+    }
+
+    .dot.live {
+      background: #10b981;
+      box-shadow: 0 0 10px #10b981;
+      animation: pulse 1.8s infinite;
+    }
+
+    @keyframes pulse {
+      0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7); }
+      70% { transform: scale(1.05); box-shadow: 0 0 0 8px rgba(16, 185, 129, 0); }
+      100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
+    }
+
+    .timer-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      color: #f59e0b;
+      font-weight: 600;
+      font-size: 13px;
+    }
+
+    /* Main Container */
+    .container {
+      max-width: 1440px;
+      width: 100%;
+      margin: 0 auto;
+      padding: 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+      flex: 1;
+    }
+
+    /* Toolbar setup card */
+    .toolbar-card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      backdrop-filter: blur(12px);
+      border-radius: 16px;
+      padding: 16px 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 16px;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+    }
+
+    .toolbar-left {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      flex: 1;
+      flex-wrap: wrap;
+      min-width: 280px;
+    }
+
+    .session-input {
+      background: rgba(0, 0, 0, 0.3);
+      border: 1px solid var(--card-border);
+      color: var(--text);
+      padding: 10px 16px;
+      border-radius: 10px;
+      font-size: 14px;
+      width: 100%;
+      max-width: 320px;
+      outline: none;
+      transition: all 0.2s;
+    }
+
+    .session-input:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
+    }
+
+    .timer-group {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .timer-label {
+      font-size: 13px;
+      color: var(--text-muted);
+      font-weight: 500;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .timer-presets {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+
+    .preset-btn {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid var(--card-border);
+      color: var(--text-muted);
+      padding: 7px 13px;
+      border-radius: 8px;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+      white-space: nowrap;
+    }
+
+    .preset-btn.active, .preset-btn:hover {
+      background: rgba(59, 130, 246, 0.25);
+      border-color: var(--accent);
+      color: white;
+    }
+
+    .custom-minutes-input {
+      width: 85px;
+      background: rgba(0, 0, 0, 0.3);
+      border: 1px solid var(--card-border);
+      color: var(--text);
+      padding: 6px 10px;
+      border-radius: 8px;
+      font-size: 12px;
+      text-align: center;
+      outline: none;
+      flex-shrink: 0;
+    }
+
+    .custom-minutes-input:focus {
+      border-color: var(--accent);
+    }
+
+    .toolbar-actions {
+      display: flex;
+      gap: 12px;
+    }
+
+    .btn {
+      border: none;
+      padding: 10px 22px;
+      border-radius: 10px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+      white-space: nowrap;
+    }
+
+    .btn-start {
+      background: var(--green-gradient);
+      color: white;
+      box-shadow: 0 4px 14px rgba(16, 185, 129, 0.35);
+    }
+
+    .btn-start:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 6px 20px rgba(16, 185, 129, 0.5);
+    }
+
+    .btn-stop {
+      background: var(--red-gradient);
+      color: white;
+      box-shadow: 0 4px 14px rgba(239, 68, 68, 0.35);
+    }
+
+    .btn-stop:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 6px 20px rgba(239, 68, 68, 0.5);
+    }
+
+    .btn:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+      transform: none !important;
+      box-shadow: none !important;
+    }
+
+    /* Grid Layout */
+    .dashboard-grid {
+      display: grid;
+      grid-template-columns: 1fr 420px;
+      gap: 20px;
+    }
+
+    @media (max-width: 1080px) {
+      .dashboard-grid { grid-template-columns: 1fr; }
+    }
+
+    @media (max-width: 600px) {
+      header { padding: 12px 16px; flex-direction: column; align-items: flex-start; gap: 10px; }
+      .header-status { width: 100%; justify-content: space-between; }
+      .toolbar-card { padding: 14px 16px; }
+      .toolbar-left { flex-direction: column; align-items: stretch; width: 100%; }
+      .session-input { max-width: 100%; }
+      .toolbar-actions { width: 100%; justify-content: space-between; }
+      .btn { flex: 1; justify-content: center; }
+    }
+
+    .card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      backdrop-filter: blur(12px);
+      border-radius: 16px;
+      padding: 20px;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+      display: flex;
+      flex-direction: column;
+    }
+
+    .card-title {
+      font-family: 'Outfit', sans-serif;
+      font-size: 15px;
+      font-weight: 600;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    /* Camera Feed Card */
+    .video-viewport {
+      position: relative;
+      width: 100%;
+      border-radius: 12px;
+      overflow: hidden;
+      background: #000;
+      aspect-ratio: 16/9;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    .video-viewport img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+
+    .camera-placeholder {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      color: var(--text-dim);
+      padding: 40px;
+      text-align: center;
+    }
+
+    .camera-placeholder i {
+      font-size: 54px;
+      color: rgba(255, 255, 255, 0.15);
+    }
+
+    .camera-placeholder p {
+      font-size: 14px;
+      max-width: 320px;
+    }
+
+    .camera-overlay-badge {
+      position: absolute;
+      top: 14px;
+      left: 14px;
+      background: rgba(0, 0, 0, 0.6);
+      backdrop-filter: blur(8px);
+      padding: 6px 12px;
+      border-radius: 8px;
+      font-size: 12px;
+      font-weight: 500;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    /* Score Widget */
+    .engagement-gauge-card {
+      background: linear-gradient(135deg, rgba(30, 41, 59, 0.6) 0%, rgba(15, 23, 42, 0.8) 100%);
+      border-radius: 14px;
+      padding: 16px;
+      margin-bottom: 20px;
+      border: 1px solid var(--card-border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .gauge-info h3 {
+      font-size: 13px;
+      color: var(--text-muted);
+      font-weight: 500;
+    }
+
+    .gauge-score {
+      font-family: 'Outfit', sans-serif;
+      font-size: 32px;
+      font-weight: 800;
+      color: white;
+      margin-top: 2px;
+    }
+
+    .gauge-badge {
+      font-size: 12px;
+      padding: 4px 10px;
+      border-radius: 12px;
+      font-weight: 600;
+      background: rgba(16, 185, 129, 0.15);
+      color: #10b981;
+      border: 1px solid rgba(16, 185, 129, 0.3);
+    }
+
+    /* Bar Charts */
+    .bar-list {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .bar-item {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .bar-header {
+      display: flex;
+      justify-content: space-between;
+      font-size: 13px;
+      font-weight: 500;
+    }
+
+    .bar-name {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .color-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+    }
+
+    .bar-track {
+      height: 10px;
+      background: rgba(0, 0, 0, 0.4);
+      border-radius: 6px;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .bar-fill {
+      height: 100%;
+      border-radius: 6px;
+      transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    /* Modal Styling */
+    .modal-overlay {
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(5, 7, 12, 0.85);
+      backdrop-filter: blur(12px);
+      z-index: 1000;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.3s ease;
+    }
+
+    .modal-overlay.active {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .modal-box {
+      background: #131724;
+      border: 1px solid var(--card-border);
+      border-radius: 20px;
+      max-width: 680px;
+      width: 100%;
+      padding: 28px;
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.6);
+      transform: scale(0.95);
+      transition: transform 0.3s ease;
+      max-height: 90vh;
+      overflow-y: auto;
+    }
+
+    .modal-overlay.active .modal-box {
+      transform: scale(1);
+    }
+
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 20px;
+      padding-bottom: 16px;
+      border-bottom: 1px solid var(--card-border);
+    }
+
+    .modal-title h2 {
+      font-family: 'Outfit', sans-serif;
+      font-size: 22px;
+      font-weight: 700;
+    }
+
+    .modal-title p {
+      font-size: 13px;
+      color: var(--text-muted);
+      margin-top: 4px;
+    }
+
+    .summary-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+
+    .summary-stat {
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid var(--card-border);
+      border-radius: 12px;
+      padding: 14px;
+      text-align: center;
+    }
+
+    .summary-stat .val {
+      font-family: 'Outfit', sans-serif;
+      font-size: 22px;
+      font-weight: 700;
+      margin-top: 4px;
+    }
+
+    .summary-stat .lbl {
+      font-size: 11px;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .insights-card {
+      background: rgba(59, 130, 246, 0.06);
+      border: 1px solid rgba(59, 130, 246, 0.2);
+      border-radius: 14px;
+      padding: 18px;
+      margin-top: 20px;
+    }
+
+    .insights-card h4 {
+      font-size: 14px;
+      color: #60a5fa;
+      margin-bottom: 10px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .insights-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .insights-list li {
+      font-size: 13px;
+      line-height: 1.5;
+      color: #cbd5e1;
+    }
+
+    .modal-footer {
+      display: flex;
+      justify-content: flex-end;
+      gap: 12px;
+      margin-top: 24px;
+      padding-top: 16px;
+      border-top: 1px solid var(--card-border);
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Top Navigation Header -->
+  <header>
+    <div class="brand">
+      <div class="brand-icon"><i class="fa-solid fa-graduation-cap"></i></div>
+      <div class="brand-text">
+        <h1>Interactive Classroom Engagement AI</h1>
+        <p>Real-Time Student Analytics & Neural Detector</p>
+      </div>
+    </div>
+    
+    <div class="header-status">
+      <div class="status-pill">
+        <span class="dot" id="liveDot"></span>
+        <span id="statusText">System Ready</span>
+      </div>
+      <div class="timer-badge" id="timerBadge" style="display: none;">
+        <i class="fa-solid fa-stopwatch"></i> <span id="timerText">00:00</span>
+      </div>
+    </div>
+  </header>
+
+  <div class="container">
+    
+    <!-- Session Controls Toolbar -->
+    <div class="toolbar-card">
+      <div class="toolbar-left">
+        <input type="text" id="sessionNameInput" class="session-input" placeholder="Session Title (e.g., Artificial Neural Networks — Lecture 4)" />
+        
+        <div class="timer-group">
+          <span class="timer-label"><i class="fa-solid fa-clock"></i> Duration:</span>
+          <div class="timer-presets">
+            <button class="preset-btn active" data-mins="0" onclick="selectPreset(this, 0)">Continuous</button>
+            <button class="preset-btn" data-mins="1" onclick="selectPreset(this, 1)">1m</button>
+            <button class="preset-btn" data-mins="5" onclick="selectPreset(this, 5)">5m</button>
+            <button class="preset-btn" data-mins="15" onclick="selectPreset(this, 15)">15m</button>
+            <button class="preset-btn" data-mins="30" onclick="selectPreset(this, 30)">30m</button>
+            <input type="number" id="customMinutesInput" class="custom-minutes-input" placeholder="Custom" min="1" max="180" oninput="selectCustomMins(this)" />
+          </div>
+        </div>
+      </div>
+
+      <div class="toolbar-actions">
+        <button id="startBtn" class="btn btn-start" onclick="startSession()">
+          <i class="fa-solid fa-play"></i> Start Session
+        </button>
+        <button id="stopBtn" class="btn btn-stop" onclick="stopSession()" disabled>
+          <i class="fa-solid fa-square"></i> Stop Session
+        </button>
+      </div>
+    </div>
+
+    <!-- Main Grid Layout -->
+    <div class="dashboard-grid">
+      
+      <!-- Left Column: Video Feed -->
+      <div class="card">
+        <div class="card-title">
+          <span><i class="fa-solid fa-video"></i> Live Camera Classroom Feed</span>
+          <span id="fpsBadge" style="font-size:12px; color:var(--text-muted); display:none;"><i class="fa-solid fa-bolt"></i> 30 FPS</span>
+        </div>
+
+        <div class="video-viewport">
+          <img id="videoFeed" src="" alt="Webcam stream feed" style="display: none;" />
+          <div id="cameraPlaceholder" class="camera-placeholder">
+            <i class="fa-solid fa-camera-rotate"></i>
+            <h3 style="font-weight:600; color:var(--text);">Camera Offline</h3>
+            <p>Click "Start Session" above to launch real-time webcam face detection and engagement prediction.</p>
+          </div>
+          <div id="liveStreamBadge" class="camera-overlay-badge" style="display: none;">
+            <span class="dot live"></span> LIVE STREAMING
+          </div>
+        </div>
+      </div>
+
+      <!-- Right Column: Live Analytics Sidepanel -->
+      <div class="card">
+        
+        <!-- Overall Engagement Score Card -->
+        <div class="engagement-gauge-card">
+          <div class="gauge-info">
+            <h3>CLASSROOM ENGAGEMENT INDEX</h3>
+            <div class="gauge-score" id="scoreValue">0%</div>
+          </div>
+          <div class="gauge-badge" id="scoreBadge">Awaiting Session</div>
+        </div>
+
+        <!-- Current Frame Distribution -->
+        <div class="card-title" style="margin-top: 4px;">
+          <span><i class="fa-solid fa-chart-simple"></i> Current Frame Status</span>
+        </div>
+        <div id="currentBars" class="bar-list" style="margin-bottom: 24px;">
+          <p style="color:var(--text-muted); font-size:13px;">No active frame predictions yet.</p>
+        </div>
+
+        <!-- Session Cumulative Totals -->
+        <div class="card-title">
+          <span><i class="fa-solid fa-chart-pie"></i> Session Cumulative Breakdown</span>
+        </div>
+        <div id="totalBars" class="bar-list">
+          <p style="color:var(--text-muted); font-size:13px;">No session data accumulated.</p>
+        </div>
+
+      </div>
+
+    </div>
+  </div>
+
+  <!-- End of Session Report Modal -->
+  <div class="modal-overlay" id="summaryModal">
+    <div class="modal-box">
+      <div class="modal-header">
+        <div class="modal-title">
+          <h2 id="modalSessionTitle">Classroom Session Summary</h2>
+          <p id="modalSessionTime">Completed Session Analysis</p>
+        </div>
+        <span class="gauge-badge" id="modalHealthBadge" style="font-size:13px; padding:6px 14px;">Excellent</span>
+      </div>
+
+      <div class="summary-grid">
+        <div class="summary-stat">
+          <div class="lbl">Engagement Score</div>
+          <div class="val" id="modalScore" style="color:#10b981;">0%</div>
+        </div>
+        <div class="summary-stat">
+          <div class="lbl">Total Duration</div>
+          <div class="val" id="modalDuration" style="color:#3b82f6;">0m 0s</div>
+        </div>
+        <div class="summary-stat">
+          <div class="lbl">Student Datapoints</div>
+          <div class="val" id="modalDatapoints" style="color:#8b5cf6;">0</div>
+        </div>
+      </div>
+
+      <div class="card-title" style="margin-top:10px;">
+        <span>Engagement Breakdown Across Session</span>
+      </div>
+      <div id="modalBars" class="bar-list"></div>
+
+      <div class="insights-card">
+        <h4><i class="fa-solid fa-lightbulb"></i> AI Classroom Insights & Recommendations</h4>
+        <ul class="insights-list" id="modalInsights">
+          <li>Classroom engagement metrics processed successfully.</li>
+        </ul>
+      </div>
+
+      <div class="modal-footer">
+        <button class="btn" style="background:rgba(255,255,255,0.08); color:var(--text);" onclick="window.print()">
+          <i class="fa-solid fa-print"></i> Print Report
+        </button>
+        <button class="btn btn-start" onclick="closeModal()">
+          <i class="fa-solid fa-check"></i> Done
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Smart API Base URL: Automatically detects if running on Flask port 5000 or external origin (e.g. Live Server port 5500)
+    const API_BASE = (window.location.origin.includes(':5000')) ? '' : 'http://localhost:5000';
+
+    const CLASS_COLORS = {
+      "Focused": "#10b981",      /* Green */
+      "Confused": "#f59e0b",     /* Amber */
+      "Frustrated": "#ef4444",   /* Red */
+      "Bored": "#8b5cf6",        /* Violet */
+      "Drowsy": "#06b6d4",       /* Cyan */
+      "Looking Away": "#64748b"  /* Slate */
+    };
+
+    let selectedMinutes = 0;
+    let pollTimer = null;
+    let isSessionRunning = false;
+
+    function selectPreset(btnEl, mins) {
+      document.querySelectorAll('.preset-btn').forEach(b => b.classList.remove('active'));
+      document.getElementById('customMinutesInput').value = '';
+      btnEl.classList.add('active');
+      selectedMinutes = mins;
+    }
+
+    function selectCustomMins(inputEl) {
+      const val = parseFloat(inputEl.value);
+      document.querySelectorAll('.preset-btn').forEach(b => b.classList.remove('active'));
+      if (val && val > 0) {
+        selectedMinutes = val;
+      } else {
+        selectedMinutes = 0;
+      }
+    }
+
+    function formatTime(sec) {
+      sec = Math.floor(sec || 0);
+      const m = Math.floor(sec / 60);
+      const s = sec % 60;
+      return `${m}m ${s < 10 ? '0' : ''}${s}s`;
+    }
+
+    function renderBars(containerId, countsObj) {
+      const container = document.getElementById(containerId);
+      const entries = Object.entries(countsObj || {});
+      if (entries.length === 0) {
+        container.innerHTML = '<p style="color:var(--text-muted); font-size:13px;">No data recorded yet.</p>';
+        return;
+      }
+      const total = entries.reduce((sum, [, v]) => sum + v, 0) || 1;
+
+      container.innerHTML = entries
+        .sort((a, b) => b[1] - a[1])
+        .map(([label, count]) => {
+          const pct = Math.round((count / total) * 100);
+          const color = CLASS_COLORS[label] || "#888";
+          return `
+            <div class="bar-item">
+              <div class="bar-header">
+                <div class="bar-name">
+                  <span class="color-dot" style="background:${color};"></span>
+                  <span>${label}</span>
+                </div>
+                <span>${pct}% (${count})</span>
+              </div>
+              <div class="bar-track">
+                <div class="bar-fill" style="width:${pct}%; background:${color};"></div>
+              </div>
+            </div>`;
+        })
+        .join("");
+    }
+
+    async function pollStats() {
+      try {
+        const res = await fetch(API_BASE + "/api/stats");
+        const data = await res.json();
+
+        // Check if session was auto-stopped by backend timer expiry
+        if (isSessionRunning && !data.active && data.auto_stopped) {
+          isSessionRunning = false;
+          onSessionEndedAuto();
+          return;
+        }
+
+        // Live badge & status text
+        document.getElementById("liveDot").classList.toggle("live", data.active);
+        document.getElementById("statusText").textContent = data.active
+          ? `Live — ${data.session_name}`
+          : "System Ready";
+
+        // Timer badge display
+        const timerBadge = document.getElementById("timerBadge");
+        if (data.active && data.remaining_seconds !== null) {
+          timerBadge.style.display = "inline-flex";
+          document.getElementById("timerText").textContent = formatTime(data.remaining_seconds) + " remaining";
+        } else if (data.active) {
+          timerBadge.style.display = "inline-flex";
+          document.getElementById("timerText").textContent = formatTime(data.elapsed_seconds) + " elapsed";
+        } else {
+          timerBadge.style.display = "none";
+        }
+
+        // Engagement gauge update
+        const score = data.engagement_score || 0;
+        document.getElementById("scoreValue").textContent = score + "%";
+        const scoreBadge = document.getElementById("scoreBadge");
+        if (!data.active) {
+          scoreBadge.textContent = "Awaiting Session";
+          scoreBadge.style.color = "#8c96ab";
+        } else if (score >= 75) {
+          scoreBadge.textContent = "High Engagement";
+          scoreBadge.style.color = "#10b981";
+        } else if (score >= 50) {
+          scoreBadge.textContent = "Moderate Attention";
+          scoreBadge.style.color = "#f59e0b";
+        } else {
+          scoreBadge.textContent = "Attention Low";
+          scoreBadge.style.color = "#ef4444";
+        }
+
+        // Render bar charts
+        renderBars("currentBars", data.current_frame_counts);
+        renderBars("totalBars", data.total_overall_counts);
+
+      } catch (e) {
+        // Backend temporarily unreachable
+      }
+    }
+
+    function startSession() {
+      const title = document.getElementById("sessionNameInput").value.trim();
+      fetch(API_BASE + "/api/session/start", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ 
+          session_name: title,
+          duration_minutes: selectedMinutes 
+        }),
+      })
+      .then(r => r.json())
+      .then(() => {
+        isSessionRunning = true;
+        const feed = document.getElementById("videoFeed");
+        feed.src = API_BASE + "/video_feed?_=" + Date.now();
+        feed.style.display = "block";
+        document.getElementById("cameraPlaceholder").style.display = "none";
+        document.getElementById("liveStreamBadge").style.display = "flex";
+        document.getElementById("fpsBadge").style.display = "inline";
+
+        document.getElementById("startBtn").disabled = true;
+        document.getElementById("stopBtn").disabled = false;
+        
+        if (!pollTimer) pollTimer = setInterval(pollStats, 1000);
+      });
+    }
+
+    function stopSession() {
+      fetch(API_BASE + "/api/session/stop", { method: "POST" })
+        .then((res) => res.json())
+        .then((data) => {
+          isSessionRunning = false;
+          showSummaryModal(data.summary);
+          resetUIState();
+        });
+    }
+
+    function onSessionEndedAuto() {
+      fetch(API_BASE + "/api/session/stop", { method: "POST" })
+        .then((res) => res.json())
+        .then((data) => {
+          showSummaryModal(data.summary);
+          resetUIState();
+        });
+    }
+
+    function resetUIState() {
+      const feed = document.getElementById("videoFeed");
+      feed.src = "";
+      feed.style.display = "none";
+      document.getElementById("cameraPlaceholder").style.display = "flex";
+      document.getElementById("liveStreamBadge").style.display = "none";
+      document.getElementById("fpsBadge").style.display = "none";
+
+      document.getElementById("startBtn").disabled = false;
+      document.getElementById("stopBtn").disabled = true;
+      document.getElementById("liveDot").classList.remove("live");
+      document.getElementById("statusText").textContent = "Session Complete";
+      document.getElementById("timerBadge").style.display = "none";
+    }
+
+    function showSummaryModal(s) {
+      if (!s) return;
+      document.getElementById("modalSessionTitle").textContent = s.session_name || "Classroom Session Summary";
+      document.getElementById("modalSessionTime").textContent = `Session Duration: ${formatTime(s.duration_seconds)}`;
+      
+      const badge = document.getElementById("modalHealthBadge");
+      badge.textContent = s.health_rating || "Good";
+      badge.style.background = (s.badge_color || "#3cb44b") + "22";
+      badge.style.color = s.badge_color || "#3cb44b";
+
+      document.getElementById("modalScore").textContent = (s.engagement_score || 0) + "%";
+      document.getElementById("modalDuration").textContent = formatTime(s.duration_seconds);
+      document.getElementById("modalDatapoints").textContent = s.num_datapoints || 0;
+
+      // Render percentages
+      const container = document.getElementById("modalBars");
+      const entries = Object.entries(s.percentages || {});
+      container.innerHTML = entries
+        .sort((a, b) => b[1] - a[1])
+        .map(([label, pct]) => {
+          const color = CLASS_COLORS[label] || "#888";
+          return `
+            <div class="bar-item">
+              <div class="bar-header">
+                <div class="bar-name">
+                  <span class="color-dot" style="background:${color};"></span>
+                  <span>${label}</span>
+                </div>
+                <span>${pct}%</span>
+              </div>
+              <div class="bar-track">
+                <div class="bar-fill" style="width:${pct}%; background:${color};"></div>
+              </div>
+            </div>`;
+        })
+        .join("");
+
+      // Render AI Insights
+      const insightsList = document.getElementById("modalInsights");
+      insightsList.innerHTML = (s.insights || []).map(i => `<li>${i}</li>`).join("");
+
+      document.getElementById("summaryModal").classList.add("active");
+    }
+
+    function closeModal() {
+      document.getElementById("summaryModal").classList.remove("active");
+    }
+
+    pollStats();
+  </script>
+</body>
+</html>
