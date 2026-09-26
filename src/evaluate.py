@@ -178,6 +178,7 @@ def plot_learning_curves(
     print(f"\nComputing Learning Curves for [{model_name}]...")
     train_sizes = np.linspace(0.2, 1.0, 5)
 
+    # pyrefly: ignore [bad-unpacking]
     train_sizes_abs, train_scores, val_scores = learning_curve(
         model,
         X,
